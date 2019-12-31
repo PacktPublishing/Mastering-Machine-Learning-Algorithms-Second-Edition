@@ -16,9 +16,9 @@ def prior(x):
 
 
 def likelihood(x):
-    a = np.sqrt(0.2 / (2.0 * np.pi * np.power(x, 3)))
-    b = - (0.2 * np.power(x - 1.0, 2)) / (2.0 * x)
-    return a * np.exp(b)
+    if x >= 0:
+        return 0.5 * np.exp(-np.abs(x))
+    return 0
 
 
 def g(x):
