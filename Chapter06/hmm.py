@@ -81,3 +81,29 @@ if __name__ == '__main__':
     ax.legend(fontsize=22)
 
     plt.show()
+
+    # Repeat the prediction with a sequence of On-time (0) flights
+    sequence0 = np.array([[0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0],
+                          [0], [0], [0]],
+                         dtype=np.int32)
+    pp0 = hmm_model.predict_proba(sequence0)
+
+    fig, ax = plt.subplots(figsize=(22, 10))
+
+    ax.plot(pp0[:, 0], "o-", linewidth=3.0, label="On-time")
+    ax.plot(pp0[:, 1], "o-", linewidth=3.0, linestyle="dashed", label="Delayed")
+
+    ax.set_xlabel("Time", fontsize=22)
+    ax.set_ylabel("State", fontsize=22)
+    ax.legend(fontsize=22)
+
+    plt.show()
