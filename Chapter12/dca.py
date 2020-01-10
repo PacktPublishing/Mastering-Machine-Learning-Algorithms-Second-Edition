@@ -6,6 +6,7 @@ import tensorflow as tf
 
 # Set random seed for reproducibility
 np.random.seed(1000)
+tf.random.set_seed(1000)
 
 
 nb_samples = 1000

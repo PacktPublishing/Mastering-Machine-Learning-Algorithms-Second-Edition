@@ -6,6 +6,7 @@ import tensorflow as tf
 
 # Set random seed for reproducibility
 np.random.seed(1000)
+tf.random.set_seed(1000)
 
 
 nb_samples = 1000
@@ -138,7 +139,7 @@ if __name__ == '__main__':
                              0.0, 0.2,
                              size=(batch_size, width, height, 1)),
                          0.0, 1.0)
-            train(xi)
+            train(xn, xi)
         print("Epoch {}: Loss: {:.3f}".
               format(e + 1, train_loss.result()))
         train_loss.reset_states()

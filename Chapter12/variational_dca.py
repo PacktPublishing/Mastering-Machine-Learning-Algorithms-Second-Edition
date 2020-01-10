@@ -6,6 +6,7 @@ import tensorflow as tf
 
 # Set random seed for reproducibility
 np.random.seed(1000)
+tf.random.set_seed(1000)
 
 
 nb_samples = 1000
@@ -15,8 +16,11 @@ code_length = 256
 
 
 class DAC(tf.keras.Model):
-    def __init__(self):
+    def __init__(self, width, height):
         super(DAC, self).__init__()
+
+        self.width = width
+        self.height = height
 
         self.c1 = tf.keras.layers.Conv2D(
             filters=32,
@@ -94,8 +98,17 @@ class DAC(tf.keras.Model):
         return logits, cm, cs, xhat
 
 
+# Load the dataset
+(X_train, _), (_, _) = \
+    tf.keras.datasets.fashion_mnist.load_data()
+X_train = X_train.astype(np.float32)[0:nb_samples] \
+            / 255.0
+
+width = X_train.shape[1]
+height = X_train.shape[2]
+
 # Create the model
-model = DAC()
+model = DAC(width, height)
 
 # Define the optimizer and the train loss function
 optimizer = tf.keras.optimizers.Adam(0.001)
@@ -122,17 +135,9 @@ def train(images):
 
 
 if __name__ == '__main__':
-    # Load the dataset
-    (X_train, _), (_, _) = \
-        tf.keras.datasets.fashion_mnist.load_data()
-    X_train = X_train.astype(np.float32)[0:nb_samples] \
-              / 255.0
-
-    width = X_train.shape[1]
-    height = X_train.shape[2]
-
     X_train_g = tf.data.Dataset.\
-        from_tensor_slices(np.expand_dims(X_train, axis=3)).\
+        from_tensor_slices(
+        np.expand_dims(X_train, axis=3)).\
         shuffle(1000).batch(batch_size)
 
     # Train the model
@@ -143,15 +148,10 @@ if __name__ == '__main__':
               format(e + 1, train_loss.result()))
         train_loss.reset_states()
 
-    # Compute the mean of the codes
-    codes = model.encoder(np.expand_dims(X_train, axis=3))
-    print("Code mean: {:.3f}".format(np.mean(codes)))
-    print("Code STD: {:.3f}".format(np.std(codes)))
-
     # Show some examples
     Xs = np.reshape(X_train[0:batch_size],
                     (batch_size, width, height, 1))
-    Ys = model(Xs)
+    _, _, _, Ys = model(Xs)
     Ys = np.squeeze(Ys * 255.0)
 
     # Show the results

@@ -6,6 +6,7 @@ import tensorflow as tf
 
 # Set random seed for reproducibility
 np.random.seed(1000)
+tf.random.set_seed(1000)
 
 
 nb_samples = 1000
@@ -15,9 +16,9 @@ code_length = 576
 alpha = 0.1
 
 
-class DAC(tf.keras.Model):
+class SparseDAC(tf.keras.Model):
     def __init__(self):
-        super(DAC, self).__init__()
+        super(SparseDAC, self).__init__()
 
         self.c1 = tf.keras.layers.Conv2D(
             filters=32,
@@ -53,7 +54,7 @@ class DAC(tf.keras.Model):
             padding='same')
 
         self.dc1 = tf.keras.layers.Conv2DTranspose(
-            filters=63,
+            filters=64,
             kernel_size=(3, 3),
             activation=tf.keras.activations.relu,
             padding='same')
@@ -96,7 +97,7 @@ class DAC(tf.keras.Model):
 
 
 # Create the model
-model = DAC()
+model = SparseDAC()
 
 # Define the optimizer and the train loss function
 optimizer = tf.keras.optimizers.Adam(0.001)
@@ -106,7 +107,7 @@ train_loss = tf.keras.metrics.Mean(name='train_loss')
 @tf.function
 def train(images):
     with tf.GradientTape() as tape:
-        reconstructions = model(images)
+        _, reconstructions = model(images)
         loss = tf.keras.losses.MSE(
             model.r_images(images), reconstructions)
     gradients = tape.gradient(
@@ -134,7 +135,7 @@ if __name__ == '__main__':
     for e in range(nb_epochs):
         for xi in X_train_g:
             train(xi)
-        print("Epoch {}: Loss: {:.3f}".
+        print("Epoch {}: Loss: {:.5f}".
               format(e + 1, train_loss.result()))
         train_loss.reset_states()
 
@@ -146,7 +147,7 @@ if __name__ == '__main__':
     # Show some examples
     Xs = np.reshape(X_train[0:batch_size],
                     (batch_size, width, height, 1))
-    Ys = model(Xs)
+    _, Ys = model(Xs)
     Ys = np.squeeze(Ys * 255.0)
 
     # Show the results
